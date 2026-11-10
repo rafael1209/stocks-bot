@@ -1,0 +1,3 @@
+symbol,date,time,timeframe,entry,stop,result,note
+INLF,2026-11-02,16:44,1,0.2946,0.2784,target,test from backtest
+INLF,2026-11-02,16:52,,0.3000,0.2900,,made-up tight stop

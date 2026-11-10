@@ -1,0 +1,8 @@
+symbol,date,tf,time,kind,score,status
+INLF,2026-10-29,1,04:25,continuation,53,stopped
+INLF,2026-10-29,1,09:32,trendline_break,59,cancelled
+INLF,2026-10-29,3,05:06,level_break,82,cancelled
+INLF,2026-10-29,3,07:30,level_break,70,stopped
+INLF,2026-10-29,3,17:51,trendline_break,67,expired
+INLF,2026-10-29,5,17:30,continuation,84,cancelled
+INLF,2026-10-29,15,17:30,continuation,85,cancelled

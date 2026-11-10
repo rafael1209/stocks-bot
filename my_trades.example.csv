@@ -1,0 +1,3 @@
+# One row per trade. Times in Israel time (as in TradingView). Last ~30 days only.
+# timeframe in minutes (1/3/5/15) - leave empty if unsure. result: target / stopped / partial / be
+# Example: INLF,2026-11-02,16:44,1,0.2946,0.2784,target,news + big volume

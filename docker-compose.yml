@@ -1,0 +1,43 @@
+# stocks.chasman.net – same shape as the other projects on the host:
+# nginx container -> shared-network -> stocks-web:8787. state/ and charts/ live on the
+# host so a redeploy keeps today's alerts (no duplicates) and the chart snapshots.
+services:
+  bot:
+    build: .
+    image: stocks-bot:local
+    container_name: stocks-bot
+    restart: unless-stopped
+    command: ["python", "main.py"]
+    env_file: .env            # TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID – never baked into the image
+    volumes:
+      - ./state:/app/state
+      - ./charts:/app/charts
+      - ./config.yaml:/app/config.yaml:ro
+      - ./watchlist.txt:/app/watchlist.txt:ro
+    networks:
+      - shared-network
+
+  web:
+    image: stocks-bot:local
+    container_name: stocks-web
+    restart: unless-stopped
+    depends_on: [bot]
+    command: ["python", "dashboard_api.py"]
+    environment:
+      DASHBOARD_HOST: 0.0.0.0
+      WEB_ENV_FILE: /app/web.env  # PIN hash + session key, written by set_pin.py; missing = locked
+    volumes:
+      - ./state:/app/state:ro
+      - ./charts:/app/charts:ro
+      - ./config.yaml:/app/config.yaml:ro
+      - ./my_trades.csv:/app/my_trades.csv:ro
+      - ./backtest_results.csv:/app/backtest_results.csv:ro
+      - ./web.env:/app/web.env:ro   # mounted, not env_file: compose would expand the '$' in the hash
+    networks:
+      - shared-network
+    expose:
+      - '8787'
+
+networks:
+  shared-network:
+    external: true

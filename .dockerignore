@@ -1,0 +1,14 @@
+.env
+web.env
+state/
+charts/
+dashboard/node_modules/
+dashboard/dist/
+__pycache__/
+*/__pycache__/
+.pytest_cache/
+tests/
+*.csv
+*.txt
+!requirements.txt
+backtest_log*

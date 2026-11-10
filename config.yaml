@@ -1,0 +1,108 @@
+# All strategy thresholds live here. Percentages are written as numbers (30 = 30%).
+
+scanner:
+  exchanges: [NASDAQ, NYSE]
+  min_change_pct: 30          # daily gain incl. premarket
+  preferred_change_pct: 40    # gains above this get a higher score
+  max_market_cap: 100_000_000 # before the daily gain (shares x previous close); null = off
+  min_market_cap: null
+  min_volume: 500_000
+  min_float_rotation: 5        # day volume / float – INO (~1x) has "no volume"
+  max_symbols: 25
+
+data:
+  source: tradingview         # tradingview (has premarket volume, matches your chart) | yahoo
+  timeframes: [1, 3, 5, 15]   # minutes; inside bars are searched on each
+  lookback_days: 2            # minute history to pull per symbol
+  daily_lookback_days: 60     # daily bars for support/resistance levels
+
+trend:
+  sma_length: 10              # SMA on the setup's own timeframe
+  sma_touch_tolerance_pct: 3  # "very close" (a few %) to SMA10 counts as a touch
+  sma_touch_lookback_bars: 7  # the touch must be within the last N bars (incl. mother + inside)
+  require_recent_sma_touch: true   # continuation only; not for trendline breaks
+  max_pullback_of_run: 0.33   # healthy pullback (90% run -> ~30% pullback)
+  hard_max_pullback_of_run: 0.4  # deeper = no uptrend-continuation context (backtest: >33% won 2/31)
+  max_giveback_of_run: 0.85   # any setup: gave back almost all of the run = no longs
+
+inside_bar:
+  reward_risk: 2.0
+  min_target_pct: 10          # target must be at least +10% from entry
+  max_mother_of_run: 0.33     # mother bar range vs. the day's run
+  valid_bars: 10              # setup expires after N bars of the same timeframe
+  stop_break: close           # a waiting setup is cancelled by a CLOSE under the cancel level
+  stop_break_buffer_pct: 3    # cancel level = stop - 3% (a ~2% dip is not a strong break)
+  support_hold:               # support zone just under the stop: cancel only under the zone
+    pivot_span: 2
+    cluster_pct: 1.5
+    min_touches: 3
+    max_gap_pct: 6            # zone within 6% under the stop
+    break_pct: 1              # close 1% under the zone = broken
+  require_realistic_target: false  # true = drop setups whose target is above the high of day
+
+levels:
+  # value-zone breakout: the entry breaks a level where the stock stalled before
+  pivot_span: 2
+  cluster_pct: 1.5            # swing highs this close together form one zone
+  min_touches: 2
+  include_intraday_zones: false  # off: 0/19 targets in the backtest (sellers defend those levels)
+  include_premarket_high: true
+  include_daily_levels: true  # prior days' highs/lows
+  include_round_numbers: true # $1, half dollars, whole dollars...
+  max_level_above_entry_pct: 0.5  # the level must be AT the entry or below – above it, it is resistance
+  max_entry_above_level_pct: 1.5  # entry already above the level by more = not a breakout
+
+overhead:
+  # reject when a strong level sits right above the entry (e.g. 0.30 over a 0.29 entry)
+  within_r: 0.5               # from the entry up to half of the risk distance
+  include_intraday_zones: false  # weak 2-touch zones would block almost everything
+  include_daily_levels: false    # 15-20 per stock – only round numbers + premarket high count
+
+range:
+  # no setups out of a long sideways range (MERC 15m: 60 min in a 9.8% band; liked setups: 3-12 min)
+  band_pct: 10
+  max_minutes: 45
+
+wicks:
+  # several bars hitting the entry level and closing far below it = sellers defend the level
+  lookback_bars: 15
+  level_tolerance_pct: 1.5    # bar high this close to the entry counts as "at the level"
+  min_wick_share: 0.5         # upper wick >= half of the bar
+  max_rejections: 3           # this many such bars = setup rejected
+
+uptrend:
+  pivot_span: 2
+  tolerance_pct: 1            # a low this far under the last higher low breaks the uptrend
+
+extension:
+  # how far the entry may be above SMA10 on each chart, whatever timeframe the setup is on
+  sma_length: 10
+  max_pct: {1: 10, 3: 10, 5: 10, 15: 20}   # 1/3/5m: not extended, 15m: up to ~20%
+  premarket_ignore: [15]                   # in premarket the 15m pullback comes later
+
+trendline:
+  enabled: true
+  pivot_span: 3               # bars on each side to confirm a swing high
+  min_touches: 3              # a real line, not just the fade after a spike
+  touch_tolerance_pct: 1.0    # how close the inside bar must sit to the line
+  max_line_above_entry_pct: 5 # line up to 5% over the mother high still counts – the ENTRY is then raised to the line
+
+history:
+  # score bonus for stocks that already ran big recently (daily chart: previous close -> high)
+  lookback_days: 22           # about a month of trading days
+  big_run_pct: 80             # counts "big runs" for the alert text; full bonus at 100%+
+
+volume:
+  avg_length: 10
+  spike_vs_pullback: 1.5      # breakout volume vs. average pullback volume
+
+session:
+  # no entries in these NY-time windows (the setup may still form there)
+  no_entry_windows: [["09:30", "09:45"]]   # first 15 min after the open = 16:30–16:45 Israel (usually)
+
+alerts:
+  symbol_cooldown_minutes: 10  # no new-setup alert on the same stock within N minutes
+  runner_alert_pct: 45         # heads-up the first time a stock runs past this % today
+
+loop:
+  interval_seconds: 45

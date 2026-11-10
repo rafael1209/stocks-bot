@@ -1,0 +1,19 @@
+# secrets
+.env
+web.env
+*.env
+!.env.example
+
+# runtime data
+state/
+charts/
+
+# junk
+__pycache__/
+*.pyc
+*.bak-*
+node_modules/
+dashboard/dist/
+
+# personal trades
+my_trades.csv
